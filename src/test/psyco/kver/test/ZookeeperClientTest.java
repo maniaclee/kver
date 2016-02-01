@@ -14,8 +14,9 @@ public class ZookeeperClientTest {
         String namespace = "psyco";
         String test = "test";
         ZookeeperClient zookeeperClient = new ZookeeperClient(zkHost, namespace, test);
+        zookeeperClient.start();
         String key = "key";
-        zookeeperClient.set(key, "valuetest");
+        zookeeperClient.set(key, "valuetest3333333");
         System.out.println(zookeeperClient.get(key));
     }
 
