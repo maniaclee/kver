@@ -34,17 +34,6 @@ public class ZookeeperClient {
         this.rootPath = path(directory);
     }
 
-    public String getRootPath() {
-        return rootPath;
-    }
-
-    public CuratorFramework getClient() {
-        return client;
-    }
-
-    private String getKeyPath(String s) {
-        return path(rootPath, s);
-    }
 
     /***
      * thread safe
@@ -61,18 +50,18 @@ public class ZookeeperClient {
                         .connectionTimeoutMs(5000)
                         .build();
                 client.start();
-                set(rootPath, new byte[0]);
+                setProperty(rootPath, new byte[0]);
                 this.started = true;
             }
         }
     }
 
 
-    public boolean set(String key, String value) {
-        return set(key, toBytes(value));
+    public boolean setProperty(String key, String value) {
+        return setProperty(key, toBytes(value));
     }
 
-    public boolean set(String key, byte[] value) {
+    public boolean setProperty(String key, byte[] value) {
         try {
             String keyPath = getKeyPath(key);
             if (!exist(keyPath))
@@ -86,7 +75,7 @@ public class ZookeeperClient {
         }
     }
 
-    public String get(String key) {
+    public String getProperty(String key) {
         try {
             return new String(client.getData().forPath(getKeyPath(key)));
         } catch (Exception e) {
@@ -107,6 +96,18 @@ public class ZookeeperClient {
             for (String s : subs)
                 stringBuilder.append(fixPath(s));
         return stringBuilder.toString();
+    }
+
+    public String getRootPath() {
+        return rootPath;
+    }
+
+    public CuratorFramework getClient() {
+        return client;
+    }
+
+    private String getKeyPath(String s) {
+        return path(rootPath, s);
     }
 
     private static String fixPath(String s) {
