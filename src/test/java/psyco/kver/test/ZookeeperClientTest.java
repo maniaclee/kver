@@ -30,7 +30,7 @@ public class ZookeeperClientTest {
     public void test() throws Exception {
         String key = "key";
         zookeeperClient.setProperty(key, "fuckyou");
-        System.out.println(zookeeperClient.getProperty(key));
+        System.out.println(zookeeperClient.getString(key));
     }
 
 

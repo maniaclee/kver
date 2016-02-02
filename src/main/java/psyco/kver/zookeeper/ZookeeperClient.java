@@ -4,6 +4,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
+import psyco.kver.util.EncodeUtils;
 
 /**
  * Created by peng on 16/2/1.
@@ -24,7 +25,13 @@ public class ZookeeperClient {
     private final String rootPath;
 
     private volatile boolean started = false;
+    private ZookeeperOperation zookeeperOperation;
 
+    /***
+     * @param zkHost
+     * @param namespace root
+     * @param directory path to use , can be /a/b/c
+     */
     public ZookeeperClient(String zkHost, String namespace, String directory) {
         this.zkHost = zkHost;
         this.namespace = namespace;
@@ -50,7 +57,7 @@ public class ZookeeperClient {
                         .connectionTimeoutMs(5000)
                         .build();
                 client.start();
-                setProperty(rootPath, new byte[0]);
+                this.zookeeperOperation = new ZookeeperOperation(client);
                 this.started = true;
             }
         }
@@ -58,16 +65,8 @@ public class ZookeeperClient {
 
 
     public boolean setProperty(String key, String value) {
-        return setProperty(key, toBytes(value));
-    }
-
-    public boolean setProperty(String key, byte[] value) {
         try {
-            String keyPath = getKeyPath(key);
-            if (!exist(keyPath))
-                client.create().forPath(keyPath, value);
-            else
-                client.setData().forPath(keyPath, value);
+            zookeeperOperation.setData(getKeyPath(key), EncodeUtils.toBytes(value));
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,17 +74,31 @@ public class ZookeeperClient {
         }
     }
 
-    public String getProperty(String key) {
+    public boolean setProperty(String key, byte[] value) {
         try {
-            return new String(client.getData().forPath(getKeyPath(key)));
+            zookeeperOperation.setData(getKeyPath(key), value);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public String getString(String key) {
+        try {
+            return EncodeUtils.getString(zookeeperOperation.getData(getKeyPath(key)));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static byte[] toBytes(String s) {
-        return s == null ? new byte[0] : s.getBytes();
+    public byte[] getProperty(String key) {
+        try {
+            return zookeeperOperation.getData(getKeyPath(key));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static String path(String path, String... subs) {
@@ -96,6 +109,10 @@ public class ZookeeperClient {
             for (String s : subs)
                 stringBuilder.append(fixPath(s));
         return stringBuilder.toString();
+    }
+
+    public void deleteProperty(String key) throws Exception {
+        zookeeperOperation.delete(getKeyPath(key));
     }
 
     public String getRootPath() {
