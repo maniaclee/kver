@@ -1,6 +1,8 @@
 package psyco.kver.zookeeper;
 
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 
 
@@ -10,6 +12,29 @@ import org.apache.zookeeper.KeeperException.NoNodeException;
 public class ZookeeperOperation {
 
     private CuratorFramework curatorClient;
+    private volatile boolean started = false;
+
+    public static CuratorFramework createClient(String zkHost, String namespace) {
+        return CuratorFrameworkFactory.builder()
+                .connectString(zkHost)
+                .namespace(namespace)
+                .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 1000))
+                .connectionTimeoutMs(5000)
+                .build();
+    }
+
+
+
+    public void start() throws Exception {
+        if (started)
+            return;
+        synchronized (this) {
+            if (!started) {
+                curatorClient.start();
+                this.started = true;
+            }
+        }
+    }
 
     public ZookeeperOperation() {
     }

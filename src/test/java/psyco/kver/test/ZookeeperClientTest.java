@@ -29,8 +29,8 @@ public class ZookeeperClientTest {
     @Test
     public void test() throws Exception {
         String key = "key";
-        zookeeperClient.setProperty(key, "fuckyou");
-        System.out.println(zookeeperClient.getString(key));
+        zookeeperClient.setProperty(key, "fuckyousdfsdf");
+        System.out.println("get->"+zookeeperClient.getString(key));
     }
 
 
