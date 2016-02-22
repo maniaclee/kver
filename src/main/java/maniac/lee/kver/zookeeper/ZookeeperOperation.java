@@ -1,4 +1,4 @@
-package psyco.kver.zookeeper;
+package maniac.lee.kver.zookeeper;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;

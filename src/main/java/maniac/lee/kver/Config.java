@@ -1,4 +1,4 @@
-package psyco.kver;
+package maniac.lee.kver;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;

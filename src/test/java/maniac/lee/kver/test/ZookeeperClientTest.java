@@ -1,9 +1,9 @@
-package psyco.kver.test;
+package maniac.lee.kver.test;
 
+import maniac.lee.kver.zookeeper.ZookeeperClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import psyco.kver.zookeeper.ZookeeperClient;
 
 /**
  * Created by peng on 16/2/1.

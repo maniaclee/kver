@@ -1,4 +1,4 @@
-package psyco.kver.util;
+package maniac.lee.kver.util;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;

@@ -1,4 +1,4 @@
-package psyco.kver.util;
+package maniac.lee.kver.util;
 
 import org.apache.commons.lang3.Validate;
 
