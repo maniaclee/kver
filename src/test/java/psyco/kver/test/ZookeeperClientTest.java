@@ -15,8 +15,7 @@ public class ZookeeperClientTest {
     public void init() throws Exception {
         String zkHost = "localhost:2181";
         String namespace = "psyco";
-        String test = "test";
-        zookeeperClient = new ZookeeperClient(zkHost, namespace, test);
+        zookeeperClient = new ZookeeperClient(zkHost, namespace);
         zookeeperClient.start();
     }
 
@@ -28,9 +27,15 @@ public class ZookeeperClientTest {
 
     @Test
     public void test() throws Exception {
-        String key = "key";
-        zookeeperClient.setProperty(key, "fuckyousdfsdf");
-        System.out.println("get->"+zookeeperClient.getString(key));
+        String key = "/key";
+//        zookeeperClient.setProperty(key, "fuckyousdfsdf");
+        System.out.println("get->" + zookeeperClient.getString(key));
+    }
+
+    @Test
+    public void children() throws Exception {
+        String key = "/";
+        zookeeperClient.list(key, s -> System.out.println(s));
     }
 
 

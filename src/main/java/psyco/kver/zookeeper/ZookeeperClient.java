@@ -5,6 +5,10 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
 import psyco.kver.util.EncodeUtils;
+import psyco.kver.util.Paths;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created by peng on 16/2/1.
@@ -19,28 +23,27 @@ public class ZookeeperClient {
      * psyco
      */
     private final String namespace;
-    /**
-     * app type
-     */
-    private final String rootPath;
 
     private volatile boolean started = false;
     private ZookeeperOperation zookeeperOperation;
+    private final boolean fixPath;
+
 
     /***
      * @param zkHost
      * @param namespace root
-     * @param directory path to use , can be /a/b/c
      */
-    public ZookeeperClient(String zkHost, String namespace, String directory) {
+    public ZookeeperClient(String zkHost, String namespace) {
+        this(zkHost, namespace, false);
+    }
+
+    public ZookeeperClient(String zkHost, String namespace, boolean fixPath) {
         this.zkHost = zkHost;
         this.namespace = namespace;
         Validate.notBlank(zkHost, "zkhost can't be empty");
         Validate.notBlank(namespace, "namespace can't be empty");
-        Validate.notBlank(directory, "directory can't be empty");
-        this.rootPath = path(directory);
+        this.fixPath = fixPath;
     }
-
 
     /***
      * thread safe
@@ -101,36 +104,31 @@ public class ZookeeperClient {
         }
     }
 
-    public static String path(String path, String... subs) {
-        Validate.notBlank(path);
-        path = fixPath(path);
-        StringBuilder stringBuilder = new StringBuilder(path);
-        if (subs != null && subs.length > 0)
-            for (String s : subs)
-                stringBuilder.append(fixPath(s));
-        return stringBuilder.toString();
-    }
-
     public void deleteProperty(String key) throws Exception {
         zookeeperOperation.delete(getKeyPath(key));
     }
 
-    public String getRootPath() {
-        return rootPath;
+    public void list(String path, Consumer<String> consumer) throws Exception {
+        if (!path.equals("/"))
+            consumer.accept(getString(path));
+        List<String> strings = client.getChildren().forPath(getKeyPath(path));
+        if (strings != null && !strings.isEmpty())
+            for (String s : strings)
+                list(Paths.path(path, s), consumer);
     }
+
 
     public CuratorFramework getClient() {
         return client;
     }
 
+    /***
+     * ignore the namespace , path must start with '/', so make sure of that.
+     */
     private String getKeyPath(String s) {
-        return path(rootPath, s);
+        return fixPath ? Paths.path(s) : s;
     }
 
-    private static String fixPath(String s) {
-        String re = s.startsWith("/") ? s : ("/" + s);
-        return re.endsWith("/") ? re.substring(0, re.length() - 1) : re;
-    }
 
     private boolean exist(String path) {
         try {
