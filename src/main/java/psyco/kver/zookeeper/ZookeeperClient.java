@@ -4,6 +4,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
+import psyco.kver.util.ByteUtil;
 import psyco.kver.util.EncodeUtils;
 import psyco.kver.util.Paths;
 
@@ -67,6 +68,44 @@ public class ZookeeperClient {
     }
 
 
+    public String getString(String key) {
+        byte[] property = getProperty(key);
+        return property == null ? null : ByteUtil.byteToString(property);
+    }
+
+    public Double getDouble(String key) {
+        byte[] property = getProperty(key);
+        return property == null ? null : ByteUtil.byteToDouble(property);
+    }
+
+    public Long getLong(String key) {
+        byte[] property = getProperty(key);
+        return property == null ? null : ByteUtil.byteToLong(property);
+    }
+
+    public Integer getInteger(String key) {
+        byte[] property = getProperty(key);
+        return property == null ? null : ByteUtil.byteToInt(property);
+    }
+
+    public Short getShort(String key) {
+        byte[] property = getProperty(key);
+        return property == null ? null : ByteUtil.byteToShort(property);
+    }
+
+    public Float getFloat(String key) {
+        byte[] property = getProperty(key);
+        return property == null ? null : ByteUtil.byteToFloat(property);
+    }
+
+    public byte[] getProperty(String key) {
+        try {
+            return zookeeperOperation.getData(getKeyPath(key));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public boolean setProperty(String key, String value) {
         try {
             zookeeperOperation.setData(getKeyPath(key), EncodeUtils.toBytes(value));
@@ -84,23 +123,6 @@ public class ZookeeperClient {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    public String getString(String key) {
-        try {
-            return EncodeUtils.getString(zookeeperOperation.getData(getKeyPath(key)));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public byte[] getProperty(String key) {
-        try {
-            return zookeeperOperation.getData(getKeyPath(key));
-        } catch (Exception e) {
-            return null;
         }
     }
 
